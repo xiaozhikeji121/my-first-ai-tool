@@ -1,13 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Describely AI - AI Product Description Generator</title>
+    <title>Describely AI - AI 产品描述生成器</title>
     <style>
-        /* =========================================
-           1. 全局变量与基础重置 (Global & Reset)
-           ========================================= */
         :root {
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
@@ -16,20 +13,15 @@
             --text-secondary: #94a3b8;
             --accent-primary: #6366f1;
             --accent-secondary: #8b5cf6;
-            --accent-glow: rgba(99, 102, 241, 0.5);
             --border-color: rgba(255, 255, 255, 0.1);
             --success: #10b981;
-            --warning: #f59e0b;
             --error: #ef4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        body { background: linear-gradient(135deg, var(--bg-primary) 0%, #020617 100%); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; position: relative; }
+        body { background: linear-gradient(135deg, var(--bg-primary) 0%, #020617 100%); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
         body::before { content: ''; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%); pointer-events: none; z-index: -1; }
 
-        /* =========================================
-           2. 导航栏 (Navigation)
-           ========================================= */
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
         .nav-logo { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer; }
         .nav-links { display: flex; gap: 30px; }
@@ -38,16 +30,10 @@
         .nav-auth-btn { padding: 10px 24px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
         .nav-auth-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5); }
 
-        /* =========================================
-           3. 视图容器 (View Containers)
-           ========================================= */
         .view { display: none; padding: 40px; max-width: 1200px; margin: 0 auto; animation: fadeIn 0.4s ease-out; }
         .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* =========================================
-           4. 登录/注册弹窗 (Auth Modal)
-           ========================================= */
         .auth-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1000; justify-content: center; align-items: center; }
         .auth-overlay.active { display: flex; }
         .auth-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); position: relative; }
@@ -61,9 +47,6 @@
         .auth-switch { text-align: center; margin-top: 20px; color: var(--text-secondary); font-size: 14px; }
         .auth-switch a { color: var(--accent-primary); text-decoration: none; cursor: pointer; }
 
-        /* =========================================
-           5. Dashboard 与 Beta 提示框
-           ========================================= */
         .beta-notice { display: flex; align-items: center; gap: 12px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 16px 20px; margin-bottom: 30px; color: #e2e8f0; backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(99, 102, 241, 0.1); animation: fadeInDown 0.5s ease-out; }
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         .notice-icon { font-size: 24px; flex-shrink: 0; }
@@ -71,14 +54,12 @@
         .notice-content .highlight { color: #a5b4fc; font-weight: 600; }
         .notice-close { background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all 0.2s; }
         .notice-close:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
         .stat-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; backdrop-filter: blur(10px); }
         .stat-label { color: var(--text-secondary); font-size: 14px; margin-bottom: 8px; }
         .stat-value { font-size: 32px; font-weight: 700; background: linear-gradient(135deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* =========================================
-           6. AI 生成表单 (Generator)
-           ========================================= */
         .generator-section { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; backdrop-filter: blur(10px); }
         .section-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
         .form-group { margin-bottom: 20px; }
@@ -92,9 +73,6 @@
         .result-box { margin-top: 24px; padding: 20px; background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color); border-radius: 12px; min-height: 100px; white-space: pre-wrap; line-height: 1.6; display: none; }
         .result-box.active { display: block; animation: fadeIn 0.3s; }
 
-        /* =========================================
-           7. 定价页 (Pricing)
-           ========================================= */
         .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px; }
         .pricing-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 40px 30px; text-align: center; backdrop-filter: blur(10px); transition: transform 0.3s, border-color 0.3s; }
         .pricing-card:hover { transform: translateY(-5px); border-color: var(--accent-primary); }
@@ -118,33 +96,33 @@
     <nav class="navbar">
         <div class="nav-logo" onclick="switchView('tool')">Describely AI</div>
         <div class="nav-links">
-            <span class="nav-link active" onclick="switchView('tool')">Tool</span>
-            <span class="nav-link" onclick="switchView('pricing')">Pricing</span>
-            <span class="nav-link" onclick="switchView('account')">My Account</span>
+            <span class="nav-link active" onclick="switchView('tool')">工具</span>
+            <span class="nav-link" onclick="switchView('pricing')">定价</span>
+            <span class="nav-link" onclick="switchView('account')">我的账户</span>
         </div>
-        <button class="nav-auth-btn" id="navAuthBtn" onclick="openAuthModal()">Login / Sign Up</button>
+        <button class="nav-auth-btn" id="navAuthBtn" onclick="openAuthModal()">登录 / 注册</button>
     </nav>
 
     <div class="auth-overlay" id="authOverlay">
         <div class="auth-card">
-            <button class="auth-close" onclick="closeAuthModal()"></button>
+            <button class="auth-close" onclick="closeAuthModal()">✕</button>
             <div id="loginFormContainer">
-                <h2 class="auth-title">Welcome Back</h2>
+                <h2 class="auth-title">欢迎回来</h2>
                 <form class="auth-form" onsubmit="handleLogin(event)">
-                    <input type="email" id="loginEmail" class="auth-input" placeholder="Email Address" required>
-                    <input type="password" id="loginPassword" class="auth-input" placeholder="Password" required>
-                    <button type="submit" class="auth-submit">Login</button>
+                    <input type="email" id="loginEmail" class="auth-input" placeholder="邮箱地址" required>
+                    <input type="password" id="loginPassword" class="auth-input" placeholder="密码" required>
+                    <button type="submit" class="auth-submit">登录</button>
                 </form>
-                <div class="auth-switch">No account? <a onclick="toggleAuthMode('register')">Sign Up</a></div>
+                <div class="auth-switch">没有账号？<a onclick="toggleAuthMode('register')">立即注册</a></div>
             </div>
             <div id="registerFormContainer" style="display: none;">
-                <h2 class="auth-title">Create Account</h2>
+                <h2 class="auth-title">创建账号</h2>
                 <form class="auth-form" onsubmit="handleRegister(event)">
-                    <input type="email" id="regEmail" class="auth-input" placeholder="Email Address" required>
-                    <input type="password" id="regPassword" class="auth-input" placeholder="Password" required>
-                    <button type="submit" class="auth-submit">Sign Up</button>
+                    <input type="email" id="regEmail" class="auth-input" placeholder="邮箱地址" required>
+                    <input type="password" id="regPassword" class="auth-input" placeholder="密码" required>
+                    <button type="submit" class="auth-submit">注册</button>
                 </form>
-                <div class="auth-switch">Already have an account? <a onclick="toggleAuthMode('login')">Login</a></div>
+                <div class="auth-switch">已有账号？<a onclick="toggleAuthMode('login')">立即登录</a></div>
             </div>
         </div>
     </div>
@@ -152,30 +130,38 @@
     <div id="appContainer">
         <div id="toolView" class="view active">
             <div class="generator-section">
-                <h2 class="section-title">✨ AI Product Description Generator</h2>
+                <h2 class="section-title">✨ AI 产品描述生成器</h2>
                 <div class="form-group">
-                    <label class="form-label">Product Name</label>
-                    <input type="text" id="genProductName" class="form-input" placeholder="e.g., Wireless Noise-Canceling Headphones">
+                    <label class="form-label">产品名称</label>
+                    <input type="text" id="genProductName" class="form-input" placeholder="例如：无线降噪耳机">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Key Features / Keywords</label>
-                    <textarea id="genFeatures" class="form-textarea" placeholder="e.g., 40h battery life, active noise cancellation..."></textarea>
+                    <label class="form-label">关键特征 / 关键词</label>
+                    <textarea id="genFeatures" class="form-textarea" placeholder="例如：40 小时续航、主动降噪、舒适耳罩..."></textarea>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="form-group">
-                        <label class="form-label">Language</label>
+                        <label class="form-label">语言</label>
                         <select id="genLanguage" class="form-select">
-                            <option value="English">English</option><option value="Spanish">Spanish</option><option value="French">French</option><option value="German">German</option><option value="Japanese">Japanese</option><option value="Chinese">Chinese</option>
+                            <option value="English">英语</option>
+                            <option value="Chinese">中文</option>
+                            <option value="Spanish">西班牙语</option>
+                            <option value="French">法语</option>
+                            <option value="German">德语</option>
+                            <option value="Japanese">日语</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Tone</label>
+                        <label class="form-label">语气</label>
                         <select id="genTone" class="form-select">
-                            <option value="Professional">Professional</option><option value="Friendly">Friendly</option><option value="Luxury">Luxury</option><option value="Urgent">Urgent (Sales)</option>
+                            <option value="Professional">专业</option>
+                            <option value="Friendly">友好</option>
+                            <option value="Luxury">奢华</option>
+                            <option value="Urgent">紧迫 (促销)</option>
                         </select>
                     </div>
                 </div>
-                <button class="btn-generate" id="generateBtn" onclick="handleGenerate()">Generate Description</button>
+                <button class="btn-generate" id="generateBtn" onclick="handleGenerate()">生成描述</button>
                 <div class="result-box" id="resultBox"></div>
             </div>
         </div>
@@ -183,32 +169,32 @@
         <div id="dashboardView" class="view">
             <div class="beta-notice" id="betaNotice">
                 <div class="notice-icon">💡</div>
-                <div class="notice-content"><strong>Beta Notice:</strong> Your account data is currently saved locally in this browser. Please <span class="highlight">do not clear your browser cache</span> or use Incognito mode, otherwise your data will be lost. (Cloud sync coming in v1.1!)</div>
+                <div class="notice-content"><strong>测试版提示：</strong>您的账号数据目前保存在本地浏览器中。请<span class="highlight">不要清除浏览器缓存</span>或使用无痕模式，否则数据将丢失。(云同步功能将在 v1.1 推出！)</div>
                 <button class="notice-close" onclick="closeBetaNotice()">✕</button>
             </div>
-            <h2 class="section-title">Dashboard</h2>
+            <h2 class="section-title">仪表盘</h2>
             <div class="stats-grid">
-                <div class="stat-card"><div class="stat-label">Current Plan</div><div class="stat-value" id="statPlan">Free</div></div>
-                <div class="stat-card"><div class="stat-label">Used This Month</div><div class="stat-value" id="statUsed">0</div></div>
-                <div class="stat-card"><div class="stat-label">Remaining</div><div class="stat-value" id="statRemaining">3</div></div>
+                <div class="stat-card"><div class="stat-label">当前套餐</div><div class="stat-value" id="statPlan">免费版</div></div>
+                <div class="stat-card"><div class="stat-label">本月已用</div><div class="stat-value" id="statUsed">0</div></div>
+                <div class="stat-card"><div class="stat-label">剩余次数</div><div class="stat-value" id="statRemaining">3</div></div>
             </div>
         </div>
 
         <div id="pricingView" class="view">
-            <h2 class="section-title" style="text-align: center; font-size: 32px;">Choose Your Plan</h2>
+            <h2 class="section-title" style="text-align: center; font-size: 32px;">选择您的套餐</h2>
             <div class="pricing-grid">
-                <div class="pricing-card"><div class="plan-name">Free</div><div class="plan-price">$0<span>/mo</span></div><ul class="plan-features"><li>3 AI Generations per month</li><li>Basic Tones</li><li>English only</li></ul><button class="btn-subscribe" disabled>Current Plan</button></div>
-                <div class="pricing-card featured"><div class="pricing-badge">MOST POPULAR</div><div class="plan-name">Pro</div><div class="plan-price">$9.9<span>/mo</span></div><ul class="plan-features"><li>Unlimited Generations</li><li>All Tones & Languages</li><li>Priority Support</li><li>No Watermark</li></ul><button class="btn-subscribe" onclick="handleSubscribe('pro')">Upgrade to Pro</button></div>
-                <div class="pricing-card"><div class="plan-name">Enterprise</div><div class="plan-price">$29.9<span>/mo</span></div><ul class="plan-features"><li>Everything in Pro</li><li>API Access</li><li>Team Collaboration</li><li>Dedicated Account Manager</li></ul><button class="btn-subscribe" onclick="handleSubscribe('enterprise')">Contact Sales</button></div>
+                <div class="pricing-card"><div class="plan-name">免费版</div><div class="plan-price">$0<span>/月</span></div><ul class="plan-features"><li>每月 3 次 AI 生成</li><li>基础语气</li><li>仅支持英语</li></ul><button class="btn-subscribe" disabled>当前套餐</button></div>
+                <div class="pricing-card featured"><div class="pricing-badge">最受欢迎</div><div class="plan-name">专业版</div><div class="plan-price">$9.9<span>/月</span></div><ul class="plan-features"><li>无限次 AI 生成</li><li>所有语气和语言</li><li>优先支持</li><li>无水印</li></ul><button class="btn-subscribe" onclick="handleSubscribe('pro')">升级到专业版</button></div>
+                <div class="pricing-card"><div class="plan-name">企业版</div><div class="plan-price">$29.9<span>/月</span></div><ul class="plan-features"><li>专业版所有功能</li><li>API 访问</li><li>团队协作</li><li>专属客户经理</li></ul><button class="btn-subscribe" onclick="handleSubscribe('enterprise')">联系销售</button></div>
             </div>
         </div>
 
         <div id="accountView" class="view">
-            <h2 class="section-title">My Account</h2>
+            <h2 class="section-title">我的账户</h2>
             <div class="generator-section">
-                <div class="form-group"><label class="form-label">Email</label><input type="text" id="accountEmail" class="form-input" readonly></div>
-                <div class="form-group"><label class="form-label">Current Plan</label><input type="text" id="accountPlan" class="form-input" readonly></div>
-                <button class="btn-subscribe" style="background: var(--error); border-color: var(--error); color: white; margin-top: 20px;" onclick="handleLogout()">Logout</button>
+                <div class="form-group"><label class="form-label">邮箱</label><input type="text" id="accountEmail" class="form-input" readonly></div>
+                <div class="form-group"><label class="form-label">当前套餐</label><input type="text" id="accountPlan" class="form-input" readonly></div>
+                <button class="btn-subscribe" style="background: var(--error); border-color: var(--error); color: white; margin-top: 20px;" onclick="handleLogout()">退出登录</button>
             </div>
         </div>
     </div>
@@ -216,11 +202,17 @@
     <script>
         let currentUser = null;
         const FREE_LIMIT = 3;
-        const LEMON_SQUEEZY_LINKS = { pro: 'https://describely-ai.lemonsqueezy.com/checkout/buy/4a3e6eb5-8afd-4b64-b505-e08813f177ad', enterprise: 'https://describely-ai.lemonsqueezy.com/checkout/buy/640a5e58-7ddd-4fbd-ad24-cd1211820780' };
+        const LEMON_SQUEEZY_LINKS = { 
+            pro: 'https://describely-ai.lemonsqueezy.com/checkout/buy/4a3e6eb5-8afd-4b64-b505-e08813f177ad', 
+            enterprise: 'https://describely-ai.lemonsqueezy.com/checkout/buy/640a5e58-7ddd-4fbd-ad24-cd1211820780' 
+        };
 
         window.onload = function() {
             const savedUser = localStorage.getItem('describely_current_user');
-            if (savedUser) { currentUser = JSON.parse(savedUser); updateUIForLoggedInUser(); }
+            if (savedUser) { 
+                currentUser = JSON.parse(savedUser); 
+                updateUIForLoggedInUser(); 
+            }
             checkBetaNoticeStatus();
         };
 
@@ -240,8 +232,13 @@
         function openAuthModal() { document.getElementById('authOverlay').classList.add('active'); }
         function closeAuthModal() { document.getElementById('authOverlay').classList.remove('active'); }
         function toggleAuthMode(mode) {
-            if (mode === 'register') { document.getElementById('loginFormContainer').style.display = 'none'; document.getElementById('registerFormContainer').style.display = 'block'; } 
-            else { document.getElementById('loginFormContainer').style.display = 'block'; document.getElementById('registerFormContainer').style.display = 'none'; }
+            if (mode === 'register') { 
+                document.getElementById('loginFormContainer').style.display = 'none'; 
+                document.getElementById('registerFormContainer').style.display = 'block'; 
+            } else { 
+                document.getElementById('loginFormContainer').style.display = 'block'; 
+                document.getElementById('registerFormContainer').style.display = 'none'; 
+            }
         }
 
         function handleLogin(e) {
@@ -250,16 +247,21 @@
             try {
                 const emailInput = document.getElementById('loginEmail');
                 const passwordInput = document.getElementById('loginPassword');
-                if (!emailInput || !passwordInput) { alert('System Error: Cannot find input fields.'); return; }
-                const email = emailInput.value.trim(); const password = passwordInput.value;
-                if (!email || !password) { alert('Please enter both email and password.'); return; }
+                if (!emailInput || !passwordInput) { alert('系统错误：找不到输入框'); return; }
+                const email = emailInput.value.trim(); 
+                const password = passwordInput.value;
+                if (!email || !password) { alert('请输入邮箱和密码'); return; }
                 const users = JSON.parse(localStorage.getItem('describely_users') || '[]');
                 const user = users.find(u => u.email === email && u.password === password);
                 if (user) {
-                    currentUser = user; localStorage.setItem('describely_current_user', JSON.stringify(user));
-                    alert('Login successful!'); closeAuthModal(); updateUIForLoggedInUser(); switchView('dashboard');
-                } else { alert('Invalid email or password.'); }
-            } catch (error) { console.error('Login Error:', error); alert('Login failed. Please check console.'); }
+                    currentUser = user; 
+                    localStorage.setItem('describely_current_user', JSON.stringify(user));
+                    alert('登录成功！'); 
+                    closeAuthModal(); 
+                    updateUIForLoggedInUser(); 
+                    switchView('dashboard');
+                } else { alert('邮箱或密码错误'); }
+            } catch (error) { console.error('登录错误:', error); alert('登录失败，请检查控制台'); }
         }
 
         function handleRegister(e) {
@@ -268,60 +270,130 @@
             try {
                 const emailInput = document.getElementById('regEmail');
                 const passwordInput = document.getElementById('regPassword');
-                if (!emailInput || !passwordInput) { alert('System Error: Cannot find input fields.'); return; }
-                const email = emailInput.value.trim(); const password = passwordInput.value;
-                if (!email || !password) { alert('Please enter both email and password.'); return; }
+                if (!emailInput || !passwordInput) { alert('系统错误：找不到输入框'); return; }
+                const email = emailInput.value.trim(); 
+                const password = passwordInput.value;
+                if (!email || !password) { alert('请输入邮箱和密码'); return; }
                 let users = JSON.parse(localStorage.getItem('describely_users') || '[]');
-                if (users.find(u => u.email === email)) { alert('This email is already registered. Please login.'); toggleAuthMode('login'); return; }
+                if (users.find(u => u.email === email)) { alert('该邮箱已注册，请登录'); toggleAuthMode('login'); return; }
                 const newUser = { email: email, password: password, plan: 'free', usedCount: 0, createdAt: new Date().toISOString() };
-                users.push(newUser); localStorage.setItem('describely_users', JSON.stringify(users));
-                currentUser = newUser; localStorage.setItem('describely_current_user', JSON.stringify(newUser));
-                alert('Registration successful! Welcome to Describely AI.'); closeAuthModal(); updateUIForLoggedInUser(); switchView('dashboard');
-            } catch (error) { console.error('Register Error:', error); alert('Registration failed. Please check console.'); }
+                users.push(newUser); 
+                localStorage.setItem('describely_users', JSON.stringify(users));
+                currentUser = newUser; 
+                localStorage.setItem('describely_current_user', JSON.stringify(newUser));
+                alert('注册成功！欢迎使用 Describely AI'); 
+                closeAuthModal(); 
+                updateUIForLoggedInUser(); 
+                switchView('dashboard');
+            } catch (error) { console.error('注册错误:', error); alert('注册失败，请检查控制台'); }
         }
 
-        function handleLogout() { localStorage.removeItem('describely_current_user'); currentUser = null; updateUIForLoggedOutUser(); switchView('tool'); alert('Logged out successfully.'); }
-        function updateUIForLoggedInUser() { document.getElementById('navAuthBtn').textContent = 'Dashboard'; document.getElementById('navAuthBtn').onclick = () => switchView('dashboard'); }
-        function updateUIForLoggedOutUser() { document.getElementById('navAuthBtn').textContent = 'Login / Sign Up'; document.getElementById('navAuthBtn').onclick = openAuthModal; }
+        function handleLogout() { 
+            localStorage.removeItem('describely_current_user'); 
+            currentUser = null; 
+            updateUIForLoggedOutUser(); 
+            switchView('tool'); 
+            alert('已退出登录'); 
+        }
+        
+        function updateUIForLoggedInUser() { 
+            document.getElementById('navAuthBtn').textContent = '仪表盘'; 
+            document.getElementById('navAuthBtn').onclick = () => switchView('dashboard'); 
+        }
+        
+        function updateUIForLoggedOutUser() { 
+            document.getElementById('navAuthBtn').textContent = '登录 / 注册'; 
+            document.getElementById('navAuthBtn').onclick = openAuthModal; 
+        }
 
         async function handleGenerate() {
-            if (!currentUser) { alert('Please login first to use AI generation.'); openAuthModal(); return; }
-            if (currentUser.plan === 'free' && currentUser.usedCount >= FREE_LIMIT) { alert('You have reached the free limit (3 times). Please upgrade to Pro!'); switchView('pricing'); return; }
+            if (!currentUser) { alert('请先登录使用 AI 生成功能'); openAuthModal(); return; }
+            if (currentUser.plan === 'free' && currentUser.usedCount >= FREE_LIMIT) { 
+                alert('您已达到免费次数限制 (3 次)，请升级到专业版！'); 
+                switchView('pricing'); 
+                return; 
+            }
             const productName = document.getElementById('genProductName').value.trim();
             const features = document.getElementById('genFeatures').value.trim();
             const language = document.getElementById('genLanguage').value;
             const tone = document.getElementById('genTone').value;
-            if (!productName || !features) { alert('Please fill in Product Name and Key Features.'); return; }
+            if (!productName || !features) { alert('请填写产品名称和关键特征'); return; }
 
             const btn = document.getElementById('generateBtn');
             const resultBox = document.getElementById('resultBox');
-            btn.disabled = true; btn.textContent = 'Generating...'; resultBox.classList.remove('active'); resultBox.textContent = '';
+            btn.disabled = true; 
+            btn.textContent = '生成中...'; 
+            resultBox.classList.remove('active'); 
+            resultBox.textContent = '';
 
             try {
+                console.log('发送请求到 /api/generate');
                 const response = await fetch('/api/generate', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ productName, features, language, tone })
                 });
+                console.log('响应状态:', response.status);
                 const data = await response.json();
+                console.log('响应数据:', data);
                 if (response.ok && data.description) {
-                    resultBox.textContent = data.description; resultBox.classList.add('active');
-                    currentUser.usedCount += 1; localStorage.setItem('describely_current_user', JSON.stringify(currentUser));
+                    resultBox.textContent = data.description; 
+                    resultBox.classList.add('active');
+                    currentUser.usedCount += 1; 
+                    localStorage.setItem('describely_current_user', JSON.stringify(currentUser));
                     let users = JSON.parse(localStorage.getItem('describely_users') || '[]');
                     const userIndex = users.findIndex(u => u.email === currentUser.email);
-                    if (userIndex !== -1) { users[userIndex] = currentUser; localStorage.setItem('describely_users', JSON.stringify(users)); }
-                } else { throw new Error(data.details || data.error || 'Generation failed'); }
+                    if (userIndex !== -1) { 
+                        users[userIndex] = currentUser; 
+                        localStorage.setItem('describely_users', JSON.stringify(users)); 
+                    }
+                } else { 
+                    throw new Error(data.details || data.error || '生成失败'); 
+                }
             } catch (error) {
-                console.error('Generate Error:', error);
-                resultBox.textContent = 'Error: ' + (error.message || 'Internal Server Error. Please check Vercel logs.');
+                console.error('生成错误:', error);
+                resultBox.textContent = '错误：' + (error.message || '内部服务器错误，请检查 Vercel 日志');
                 resultBox.classList.add('active');
-            } finally { btn.disabled = false; btn.textContent = 'Generate Description'; }
+            } finally { 
+                btn.disabled = false; 
+                btn.textContent = '生成描述'; 
+            }
         }
 
-        function handleSubscribe(plan) { if (!currentUser) { alert('Please login first.'); openAuthModal(); return; } const link = LEMON_SQUEEZY_LINKS[plan]; if (link) window.open(link, '_blank'); }
-        function updateDashboardStats() { if (!currentUser) return; document.getElementById('statPlan').textContent = currentUser.plan.charAt(0).toUpperCase() + currentUser.plan.slice(1); document.getElementById('statUsed').textContent = currentUser.usedCount || 0; const remaining = currentUser.plan === 'pro' ? '∞' : Math.max(0, FREE_LIMIT - (currentUser.usedCount || 0)); document.getElementById('statRemaining').textContent = remaining; }
-        function updateAccountInfo() { if (!currentUser) return; document.getElementById('accountEmail').value = currentUser.email; document.getElementById('accountPlan').value = currentUser.plan.charAt(0).toUpperCase() + currentUser.plan.slice(1); }
-        function closeBetaNotice() { const notice = document.getElementById('betaNotice'); if (notice) { notice.style.display = 'none'; localStorage.setItem('beta_notice_closed', 'true'); } }
-        function checkBetaNoticeStatus() { if (localStorage.getItem('beta_notice_closed') === 'true') { const notice = document.getElementById('betaNotice'); if (notice) notice.style.display = 'none'; } }
+        function handleSubscribe(plan) { 
+            if (!currentUser) { alert('请先登录'); openAuthModal(); return; } 
+            const link = LEMON_SQUEEZY_LINKS[plan]; 
+            if (link) window.open(link, '_blank'); 
+        }
+        
+        function updateDashboardStats() { 
+            if (!currentUser) return; 
+            document.getElementById('statPlan').textContent = currentUser.plan === 'pro' ? '专业版' : '免费版'; 
+            document.getElementById('statUsed').textContent = currentUser.usedCount || 0; 
+            const remaining = currentUser.plan === 'pro' ? '∞' : Math.max(0, FREE_LIMIT - (currentUser.usedCount || 0)); 
+            document.getElementById('statRemaining').textContent = remaining; 
+        }
+        
+        function updateAccountInfo() { 
+            if (!currentUser) return; 
+            document.getElementById('accountEmail').value = currentUser.email; 
+            document.getElementById('accountPlan').value = currentUser.plan === 'pro' ? '专业版' : '免费版'; 
+        }
+        
+        function closeBetaNotice() { 
+            const notice = document.getElementById('betaNotice'); 
+            if (notice) { 
+                notice.style.display = 'none'; 
+                localStorage.setItem('beta_notice_closed', 'true'); 
+            } 
+        }
+        
+        function checkBetaNoticeStatus() { 
+            if (localStorage.getItem('beta_notice_closed') === 'true') { 
+                const notice = document.getElementById('betaNotice'); 
+                if (notice) notice.style.display = 'none'; 
+            } 
+        }
     </script>
 </body>
 </html>
